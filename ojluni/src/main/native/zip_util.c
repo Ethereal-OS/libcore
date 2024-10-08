@@ -901,6 +901,19 @@ ZIP_Put_In_Cache0(const char *name, ZFILE zfd, char **pmsg, jlong lastModified,
         else
             zip->locsig = JNI_FALSE;
     }
+    
+
+        // BEGIN Android-changed: do not accept files with invalid header.
+        if (!LOCSIG_AT(errbuf) && !ENDSIG_AT(errbuf)) {
+            if (pmsg) {
+                *pmsg = strdup("Entry at offset zero has invalid LFH signature.");
+            }
+            ZFILE_Close(zfd);
+            freeZip(zip);
+            return NULL;
+        }
+        // END Android-changed: do not accept files with invalid header.
+     }
 
     // This lseek is safe because it happens during construction of the ZipFile
     // object. We must take care not to perform any operations that change the
